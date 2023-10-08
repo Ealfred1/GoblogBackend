@@ -7,8 +7,8 @@ django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
 filelock
-pipenv==
-platformdirs==
+pipenv
+platformdirs
 PyJWT
 pytz
 six
