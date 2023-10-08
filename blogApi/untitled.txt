@@ -1,0 +1,13 @@
+const [blogs, setBlogs] = useState([])
+  
+  useEffect(() => {
+    fetch('http://localhost:8000/api/blogs')
+    .then(res => res.json())
+    .then(data => {
+      setBlogs(data)
+      console.log(blogs)
+    }).catch(err => {
+      alert(err)
+      console.log(err)
+    })
+  }, [])
