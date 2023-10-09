@@ -3,7 +3,7 @@ import BlogList from './BlogList'
 import useFetch from './useFetch'
 
 const Home = () => {
-  const { data: blogs, isLoading, error, } = useFetch('/api/blogs')
+  const { data: blogs, isLoading, error, } = useFetch('https://goblog-fl.onrender.com/api/blogs')
   
   return (
     <div className="mt-12 px-4">
