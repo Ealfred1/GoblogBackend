@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-u+k+=q1uil-yh$zbepq$n+yxrir%e177t)d7+v(*22tpuc2n8f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -89,7 +89,7 @@ DATABASES = {
 
 CORS_ALLOWED_ORIGINS = [
   
-    "https://goblog-fl.onrender.com/",
+    "http://localhost:5173",
 
 ]
 
