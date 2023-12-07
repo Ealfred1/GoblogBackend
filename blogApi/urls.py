@@ -1,12 +1,20 @@
 from django.urls import path
 
-from . import views
+from .views import *
+
+from rest_framework_simplejwt.views import TokenRefreshView
+
 
 urlpatterns = [
-	path('', views.blog_overview, name='blog-overview'),
-	path('blogs/', views.blogs, name='blogs'),
-	path('create/', views.create_blog, name='create_blog'),
-	path('blog/<int:blog_id>/', views.blog_detail, name='blog_detail'),
-	path('edit/<int:blog_id>/', views.edit_blog, name='edit_blog'),
-	path('delete/<int:blog_id>/', views.task_delete, name='task_delete'),
+	# Users and Auth
+	path('users/', UserList.as_view()),
+	path('user/<int:pk>', UserDetail.as_view()),
+	path('register/', UserRegistration.as_view()),
+	path('token/', UserLogin.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # Posts
+    
+    path('posts/', PostList.as_view()),
+    path('post/<int:pk>', PostDetail.as_view())
 ]

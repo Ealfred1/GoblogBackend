@@ -1,62 +1,71 @@
 from django.shortcuts import render, get_object_or_404
-from rest_framework.decorators import api_view
+from django.contrib.auth import authenticate
+# from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import BlogPost
-from .serializer import PostSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.generics import *
+from .models import Post
+from .serializer import *
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
-@api_view(['GET'])
-def blog_overview(request):
-	api_urls = {
-		'List': '/task-list/',
-		'Detail': '/task-detail/<str:pk>',
-		'Create': '/task-create/',
-		'Update': '/task-update/<str:pk>',
-		'Delete': '/task-delete/<str:pk>',
-	}
-	return Response(api_urls)
+#  Users
+
+class UserList(ListAPIView):
+	queryset = User.objects.all()
+	serializer_class = UserSerializer
 
 
-@api_view(['GET'])
-def blogs(request):
-  blogs = BlogPost.objects.all()
-  serializer = PostSerializer(blogs, many=True)
-  
-  return Response(serializer.data)
+class UserDetail(RetrieveAPIView):
+	queryset = User.objects.all()
+	serializer_class = UserSerializer
+
+class UserRegistration(CreateAPIView):
+	serializer_class = UserRegistrationSerializer
 
 
-@api_view(['GET'])
-def blog_detail(request, blog_id):
-  blog = get_object_or_404(BlogPost, id=blog_id)
-  serializer = PostSerializer(blog, many=False)
-  
-  return Response(serializer.data)
+class UserLogin(APIView):
+	def post(self, request):
+		data = request.data
+		serializer = LoginSerializer(data=data)
+		
+		if serializer.is_valid():
+			username = serializer.data['username']
+			password = serializer.data['password']
+			
+			user = authenticate(request,username=username, password=password)
+			
+			if user is not None:
+				refresh = RefreshToken.for_user(user)
+				user_serializer = UserSerializer(user)
+				return Response({
+					'refresh': str(refresh),
+					'access': str(refresh.access_token),
+					#'user': f'{user.first_name} {user.last_name}',
+					'user': user_serializer.data
+				})
+			return Response({
+				'message': 'Invalid Credentials'
+			})
+		
+		return Response({
+			'message': 'Something went wrong',
+			'data': serializer.errors
+		})
 
+# Posts
 
-@api_view(['POST'])
-def create_blog(request):
-  serializer = PostSerializer(data=request.data)
-  
-  if serializer.is_valid():
-    serializer.save()
-    
-    return Response(serializer.data)
+class PostList(ListCreateAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+  #  permission_classes = [IsAuthenticatedOrReadOnly]
 
-@api_view(['POST'])
-def edit_blog(request, blog_id):
-  blog = get_object_or_404(BlogPost, id=blog_id)
-  serializer = PostSerializer(instance=blog, data=request.data)
-  
-  if serializer.is_valid():
-    serializer.save()
-  
-  return Response(serializer.data)
-  
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
-@api_view(['DELETE'])
-def task_delete(request, blog_id):
-	blog = get_object_or_404(BlogPost, id=blog_id)
-	blog.delete()
-	
-	return Response('Blog Deleted Successfully')
-
+class PostDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
